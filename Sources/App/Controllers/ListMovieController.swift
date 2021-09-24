@@ -17,7 +17,7 @@ struct ListMovieController: RouteCollection{
         let lists = routes.grouped("list")
         let de = lists.grouped("detail")
         de.get(":listID",use: GetListDetail)
-//        de.post(use: create)
+        de.post("new",use: postListMovie)
 //        de.group("delete"){ lis in
 //            lis.delete(":commentID",use: delete)
 //        }
@@ -37,25 +37,25 @@ struct ListMovieController: RouteCollection{
 
     }
 
-//
-//    func create(req: Request) throws -> EventLoopFuture<Comment> {
-//        let todo = try req.content.decode(CommentTodo.self)
-//
-//        return User.query(on: req.db)
-//            .filter(\.$UserName == todo.UserName)
-//            .first()
-//            .unwrap(or: Abort(.notFound))
-//            .flatMap{ usr in
-//                Article.query(on: req.db)
-//                    .filter(\.$id == todo.ArticleID)
-//                    .first()
-//                    .unwrap(or: Abort(.notFound))
-//                    .flatMap{ art in
-//                        let comment = Comment(Text: todo.Text, user: usr, article: art, LikeCount: todo.LikeCount)
-//                        return comment.create(on: req.db).map{ comment }
-//                    }
-//            }
-//    }
+
+    func postListMovie(req: Request) throws -> EventLoopFuture<ListMovie> {
+        let todo = try req.content.decode(NewListMovie.self)
+
+        return User.query(on: req.db)
+            .filter(\.$UserName == todo.UserName)
+            .first()
+            .unwrap(or: Abort(.notFound))
+            .flatMap{ usr in
+                List.query(on: req.db)
+                    .filter(\.$Title == todo.listTitle)
+                    .first()
+                    .unwrap(or: Abort(.notFound))
+                    .flatMap{ lis in
+                        let detail = ListMovie(list: lis, movie: todo.movieID, title: todo.movietitle, posterPath: todo.posterPath, feeling: todo.feeling, ratetext: todo.ratetext)
+                        return detail.create(on: req.db).map{ detail }
+                    }
+            }
+    }
 //
 //    func delete(req: Request) throws -> EventLoopFuture<HTTPStatus> {
 //        return Comment.find(req.parameters.get("commentID"), on: req.db)
