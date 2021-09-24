@@ -24,8 +24,8 @@ final class Article: Model, Content{
     @Parent(key: "user_id")
     var user: User
     
-    @Parent(key: "movie_id")
-    var movie: Movie
+    @Field(key: "movie_id")
+    var movie: Int
     
     @Field(key: "LikeCount")
     var LikeCount: String
@@ -36,11 +36,11 @@ final class Article: Model, Content{
     
     init() {}
     
-    init(id: UUID? = nil, Title: String, Text:String, user:User, movie:Movie){
+    init(id: UUID? = nil, Title: String, Text:String, user:User, movie:Int){
         self.id = id
         self.Title = Title
         self.Text = Text
         self.$user.id = user.id! //when setting a parent, only need to set the wrapper's id to hook in the relation
-        self.$movie.id = movie.id!
+        self.movie = movie
     }
 }

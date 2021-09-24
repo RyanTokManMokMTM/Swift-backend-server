@@ -16,7 +16,7 @@ struct CreateArticle: Migration{
             .field("article_Title", .custom("character varying(100)"), .required)
             .field("article_Text", .custom("character varying(200)"), .required)
             .field("user_id", .uuid, .required, .references("users","id"))
-            .field("movie_id",.int,.required, .references("movies","movie_id"))
+            .field("movie_id",.int,.required)
             .field("LikeCount", .int)
             .field("LastModifiedOn", .datetime, .required)
             .create()

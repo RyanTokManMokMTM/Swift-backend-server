@@ -14,19 +14,37 @@ struct ArticleController: RouteCollection{
     func boot(routes: RoutesBuilder) throws {
         
         let articles = routes.grouped("article")
-        articles.get(use: index)
-//        articles.post(use: create)
-        articles.group(":articleID"){ article in
-            article.delete(use: delete)
+        articles.group(":movieID"){ art in
+            art.get(use: GetArticle)
         }
+     
+//        articles.post(use: create)
+//        articles.group("delete"){ article in
+//            article.delete(":articleID",use: delete)
+//        }
         
     }
 
     func index(req: Request) throws -> EventLoopFuture<[Article]> {
         return Article.query(on: req.db)
             .with(\.$user)
-            .with(\.$movie)
+            .sort(\.$updatedOn, .descending)
             .all()
+    }
+    
+    
+    func GetArticle(req: Request) throws -> EventLoopFuture<[Article]> {
+
+        guard let movieID = req.parameters.get("movieID") as Int? else{
+            throw Abort(.badRequest)
+        }
+
+        return  Article.query(on: req.db)
+            .with(\.$user)
+            .sort(\.$updatedOn, .descending)
+            .filter(Article.self, \Article.$movie == movieID )
+            .all()
+
     }
     
     

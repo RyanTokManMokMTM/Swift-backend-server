@@ -25,8 +25,8 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreateMovie())
     app.migrations.add(CreateArticle())
     app.migrations.add(CreateComment())
-//    app.migrations.add(CreateList())
-//    app.migrations.add(CreateListMovie())
+    app.migrations.add(CreateList())
+    app.migrations.add(CreateListMovie())
     
     //JWT private key
     let privateKey = try String(contentsOfFile: app.directory.workingDirectory + "myjwt.key")

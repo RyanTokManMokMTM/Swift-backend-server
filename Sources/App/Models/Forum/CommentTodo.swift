@@ -15,3 +15,10 @@ struct CommentTodo: Content {
     var ArticleID : UUID
     var LikeCount:String
 }
+
+
+struct UpdateComment: Content {
+    var CommentID: UUID
+    var Text: String
+    var LikeCount:String
+}

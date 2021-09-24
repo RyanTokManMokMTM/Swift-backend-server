@@ -19,16 +19,21 @@ struct ListController: RouteCollection{
             lis.get(":userID",use: GetMyList)
         }
         
-//        lists.post(use: create)
-//        lists.group("delete"){ lis in
-//            lis.delete(":commentID",use: delete)
-//        }
+        lists.post("new",use: postList)
+        lists.put("update",use: updateList)
+        lists.group("delete"){ lis in
+            lis.delete(":listID",use: deleteList)
+        }
     }
+    
+    
+    //--------------------------------get片單--------------------------------//
 
     func GetAllList(req: Request) throws -> EventLoopFuture<[List]> {
 
         return  List.query(on: req.db)
             .with(\.$user)
+            .sort(\.$updatedOn, .descending) //近期的片單出現在前面
             .all()
 
     }
@@ -42,37 +47,51 @@ struct ListController: RouteCollection{
         return  List.query(on: req.db)
             .with(\.$user)
             .filter(List.self, \List.$user.$id == userID )
+            .sort(\.$updatedOn, .descending)
             .all()
 
     }
-//
-//
-//    func create(req: Request) throws -> EventLoopFuture<Comment> {
-//        let todo = try req.content.decode(CommentTodo.self)
-//
-//        return User.query(on: req.db)
-//            .filter(\.$UserName == todo.UserName)
-//            .first()
-//            .unwrap(or: Abort(.notFound))
-//            .flatMap{ usr in
-//                Article.query(on: req.db)
-//                    .filter(\.$id == todo.ArticleID)
-//                    .first()
-//                    .unwrap(or: Abort(.notFound))
-//                    .flatMap{ art in
-//                        let comment = Comment(Text: todo.Text, user: usr, article: art, LikeCount: todo.LikeCount)
-//                        return comment.create(on: req.db).map{ comment }
-//                    }
-//            }
-//    }
-//
-//    func delete(req: Request) throws -> EventLoopFuture<HTTPStatus> {
-//        return Comment.find(req.parameters.get("commentID"), on: req.db)
-//            .unwrap(or: Abort(.notFound))
-//            .flatMap{ $0.delete(on: req.db) }
-//            .transform(to: .ok)
-//    }
-//
+
+
+    //--------------------------------post片單--------------------------------//
+    func postList(req: Request) throws -> EventLoopFuture<List> {
+        let todo = try req.content.decode(NewList.self)
+
+        return User.query(on: req.db)
+            .filter(\.$id == todo.UserID)
+            .first()
+            .unwrap(or: Abort(.notFound))
+            .flatMap{ usr in
+                let list = List(Title: todo.listTitle, user: usr)
+                return list.create(on: req.db).map{ list }
+            }
+    }
+    
+    //--------------------------------update片單內容--------------------------------//
+    
+    func updateList(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let update = try req.content.decode(UpdateList.self)
+
+        return List.find(update.listID, on: req.db)
+            .unwrap(or: Abort(.notFound))
+            .flatMap{
+                $0.Title = update.listTitle
+                return $0.update(on: req.db).transform(to: .ok)
+            }
+
+    }
+    
+    
+    
+   //--------------------------------delete片單內容--------------------------------//
+   
+   func deleteList(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+       return List.find(req.parameters.get("listID"), on: req.db)
+           .unwrap(or: Abort(.notFound))
+           .flatMap{ $0.delete(on: req.db) }
+           .transform(to: .ok)
+   }
+    
     
    
 }
