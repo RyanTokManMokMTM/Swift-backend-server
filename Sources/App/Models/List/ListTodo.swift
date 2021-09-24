@@ -22,7 +22,7 @@ struct NewListMovie: Content{
 }
 
 //--------------------------------編輯電影評價（PUT)----------------------------------------//
-struct UpdateListMovie: Encodable{       //取片單
+struct UpdateListMovie: Content{       //取片單
     var ListDetailID : UUID
     var feeling : String
     var ratetext : Int

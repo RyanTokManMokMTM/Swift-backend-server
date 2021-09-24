@@ -18,11 +18,13 @@ struct ListMovieController: RouteCollection{
         let de = lists.grouped("detail")
         de.get(":listID",use: GetListDetail)
         de.post("new",use: postListMovie)
-//        de.group("delete"){ lis in
-//            lis.delete(":commentID",use: delete)
-//        }
+        de.put("update",use: updateListMovie)
+        de.group("delete"){ lis in
+            lis.delete(":listID",use: deleteListMovie)
+        }
     }
 
+    //--------------------------------get某片單內容--------------------------------//
     func GetListDetail(req: Request) throws -> EventLoopFuture<[ListMovie]> {
 
         guard let listID = req.parameters.get("listID") as UUID? else{
@@ -37,7 +39,7 @@ struct ListMovieController: RouteCollection{
 
     }
 
-
+    //--------------------------------post片單內容--------------------------------//
     func postListMovie(req: Request) throws -> EventLoopFuture<ListMovie> {
         let todo = try req.content.decode(NewListMovie.self)
 
@@ -56,13 +58,29 @@ struct ListMovieController: RouteCollection{
                     }
             }
     }
-//
-//    func delete(req: Request) throws -> EventLoopFuture<HTTPStatus> {
-//        return Comment.find(req.parameters.get("commentID"), on: req.db)
-//            .unwrap(or: Abort(.notFound))
-//            .flatMap{ $0.delete(on: req.db) }
-//            .transform(to: .ok)
-//    }
+    
+    //--------------------------------update片單內容--------------------------------//
+    
+    func updateListMovie(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let update = try req.content.decode(UpdateListMovie.self)
+
+        return ListMovie.find(update.ListDetailID, on: req.db)
+            .unwrap(or: Abort(.notFound))   //找不到ID就回傳not found
+            .flatMap{
+                $0.feeling = update.feeling
+                $0.ratetext = update.ratetext
+                return $0.update(on: req.db).transform(to: .ok)
+            }
+
+    }
+    
+ 
+    func deleteListMovie(req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        return ListMovie.find(req.parameters.get("listID"), on: req.db)
+            .unwrap(or: Abort(.notFound))
+            .flatMap{ $0.delete(on: req.db) }
+            .transform(to: .ok)
+    }
 
     
    
