@@ -22,6 +22,8 @@ struct CommentController: RouteCollection{
         }
     }
 
+    //--------------------------------get留言--------------------------------//
+   
     func index(req: Request) throws -> EventLoopFuture<[Comment]> {
         
         guard let articleID = req.parameters.get("articleID") as UUID? else{

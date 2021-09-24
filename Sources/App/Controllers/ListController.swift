@@ -58,11 +58,11 @@ struct ListController: RouteCollection{
         let todo = try req.content.decode(NewList.self)
 
         return User.query(on: req.db)
-            .filter(\.$id == todo.UserID)
+            .filter(\.$UserName == todo.UserName)
             .first()
             .unwrap(or: Abort(.notFound))
             .flatMap{ usr in
-                let list = List(Title: todo.listTitle, user: usr)
+                let list = List(Title: todo.Title, user: usr)
                 return list.create(on: req.db).map{ list }
             }
     }

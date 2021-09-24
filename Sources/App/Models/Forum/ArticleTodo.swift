@@ -9,9 +9,18 @@ import Foundation
 import Fluent
 import Vapor
 
-//因為客戶端發表新文章時，只會傳回title和text 
-struct ArticleTodo: Content {
+//------------------發表新文章（POST)------------------//
+struct NewArticle: Content {
     var Title : String
     var Text : String
-    var Movie : Int
+    var movieID : Int
+    var userID : UUID
 }
+
+//------------------編輯文章（PUT)------------------//
+struct UpdateArticle: Content{
+    var articleID : UUID
+    var Title : String
+    var Text : String
+}
+

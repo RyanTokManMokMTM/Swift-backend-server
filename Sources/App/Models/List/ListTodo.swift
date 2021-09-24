@@ -12,8 +12,8 @@ import Vapor
 
 //--------------------------------新增片單（POST)----------------------------------------//
 struct NewList: Content{
-    var listTitle : String
-    var UserID : UUID
+    var Title : String
+    var UserName : String
 }
 
 //--------------------------------編輯片單（PUT)----------------------------------------//
@@ -25,7 +25,7 @@ struct UpdateList: Content{
 //--------------------------------新增電影評價（POST)----------------------------------------//
 struct NewListMovie: Content{
     var listTitle : String
-    var UserName : String
+    var UserName : String   //利用listTitle和UserName識別片單
     var movieID : Int
     var movietitle : String
     var posterPath : String
