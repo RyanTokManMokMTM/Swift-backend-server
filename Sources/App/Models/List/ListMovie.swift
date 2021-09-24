@@ -19,13 +19,13 @@ final class ListMovie: Model, Content{
     var list: List
 
     @Field(key: "movie_id")
-    var movie_id: Int
+    var movie: Int
     
     @Field(key: "movie_title")
-    var movie_title: String
+    var title: String
     
     @Field(key: "movie_posterPath")
-    var movie_poster: String
+    var posterPath: String
     
     @Field(key: "user_feeling")
     var feeling: String
@@ -36,12 +36,12 @@ final class ListMovie: Model, Content{
 
     init() {}
 
-    init(id: UUID? = nil, list: List,movie_id:Int, movie_title:String, movie_poster:String, feeling:String, ratetext:Int){
+    init(id: UUID? = nil, list: List,movie:Int, title:String, posterPath:String, feeling:String, ratetext:Int){
         self.id = id
         self.$list.id = list.id!
-        self.movie_id = movie_id
-        self.movie_title = movie_title
-        self.movie_poster = movie_poster
+        self.movie = movie
+        self.title = title
+        self.posterPath = posterPath
         self.feeling = feeling
         self.ratetext = ratetext
     }
