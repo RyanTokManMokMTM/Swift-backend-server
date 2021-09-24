@@ -18,11 +18,26 @@ public func configure(_ app: Application) throws {
     // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
     app.http.server.configuration.port = 8080
-    
     app.databases.use(.postgres(hostname: "localhost" ,username: "postgres",password:"",database:"MovieDB"), as: .psql)
 
-//    app.migrations.add(CreateTodo())
-
+    //terminal: vapor run migrate
+    app.migrations.add(CreateUser())
+    app.migrations.add(CreateMovie())
+    app.migrations.add(CreateArticle())
+    app.migrations.add(CreateComment())
+//    app.migrations.add(CreateList())
+//    app.migrations.add(CreateListMovie())
+    
+    //JWT private key
+    let privateKey = try String(contentsOfFile: app.directory.workingDirectory + "myjwt.key")
+    let privateSigner = try JWTSigner.rs256(key: .private(pem:privateKey.bytes))
+    //JWT public key
+    let publicKey = try String(contentsOfFile: app.directory.workingDirectory + "myjwt.key.pub")
+    let publicSigner = try JWTSigner.rs256(key: .public(pem:publicKey.bytes))
+    
+    app.jwt.signers.use(privateSigner, kid: .private)
+    app.jwt.signers.use(publicSigner, kid: .public, isDefault: true)
+    
     // register routes
     try routes(app)
 }

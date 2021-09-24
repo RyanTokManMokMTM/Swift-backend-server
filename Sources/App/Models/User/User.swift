@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Kao Li Chi on 2021/2/15.
 //
@@ -66,7 +66,7 @@ struct JWTBearerAuthenticator: JWTAuthenticator{
                     .unwrap(or: Abort(.notFound))   //找不到id就回傳not found
                     .map{ user in
                         request.auth.login(user)
-                    }            
+                    }
         } catch {
             return request.eventLoop.makeSucceededFuture(())
         }
