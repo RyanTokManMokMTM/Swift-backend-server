@@ -15,6 +15,10 @@ struct ListController: RouteCollection{
         
         let lists = routes.grouped("list")
         lists.get(use: GetAllList)
+        lists.group("my"){ lis in
+            lis.get(":userID",use: GetMyList)
+        }
+        
 //        lists.post(use: create)
 //        lists.group("delete"){ lis in
 //            lis.delete(":commentID",use: delete)
@@ -25,6 +29,19 @@ struct ListController: RouteCollection{
 
         return  List.query(on: req.db)
             .with(\.$user)
+            .all()
+
+    }
+    
+    func GetMyList(req: Request) throws -> EventLoopFuture<[List]> {
+
+        guard let userID = req.parameters.get("userID") as UUID? else{
+            throw Abort(.badRequest)
+        }
+        
+        return  List.query(on: req.db)
+            .with(\.$user)
+            .filter(List.self, \List.$user.$id == userID )
             .all()
 
     }
