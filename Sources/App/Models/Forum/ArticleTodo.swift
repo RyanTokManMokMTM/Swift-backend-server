@@ -22,5 +22,6 @@ struct UpdateArticle: Content{
     var articleID : UUID
     var Title : String
     var Text : String
+    var LikeCount: Int
 }
 

@@ -13,12 +13,12 @@ struct CommentTodo: Content {
     var Text: String
     var UserName : String
     var ArticleID : UUID
-    var LikeCount:String
+    var LikeCount: Int
 }
 
 
 struct UpdateComment: Content {
     var CommentID: UUID
     var Text: String
-    var LikeCount:String
+    var LikeCount: Int
 }

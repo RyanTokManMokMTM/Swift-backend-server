@@ -74,7 +74,7 @@ struct ArticleController: RouteCollection{
             }
     }
     
-    //--------------------------------update片單內容--------------------------------//
+    //--------------------------------update文章--------------------------------//
     func updateArticle(req: Request) throws -> EventLoopFuture<HTTPStatus> {
         let update = try req.content.decode(UpdateArticle.self)
 
@@ -88,7 +88,7 @@ struct ArticleController: RouteCollection{
 
     }
     
-    //--------------------------------delete片單內容--------------------------------//
+    //--------------------------------delete文章--------------------------------//
     func deleteArticle(req: Request) throws -> EventLoopFuture<HTTPStatus> {
         return Article.find(req.parameters.get("articleID"), on: req.db)
             .unwrap(or: Abort(.notFound))

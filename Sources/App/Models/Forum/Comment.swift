@@ -25,7 +25,7 @@ final class Comment: Model, Content{
     var article: Article
     
     @Field(key: "LikeCount")
-    var LikeCount: String
+    var LikeCount: Int
     
     @Timestamp(key: "LastModifiedOn", on: .update)
     var updatedOn: Date?
@@ -33,7 +33,7 @@ final class Comment: Model, Content{
     
     init() {}
     
-    init(id: UUID? = nil, Text:String, user:User, article:Article, LikeCount:String){
+    init(id: UUID? = nil, Text:String, user:User, article:Article, LikeCount:Int){
         self.id = id
         self.Text = Text
         self.$user.id = user.id! //when setting a parent, only need to set the wrapper's id to hook in the relation
