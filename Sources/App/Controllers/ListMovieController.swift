@@ -16,6 +16,7 @@ struct ListMovieController: RouteCollection{
         //http://127.0.0.1:8080/list/detail/...
         let lists = routes.grouped("list")
         let de = lists.grouped("detail")
+        
         de.get(":listID",use: GetListDetail)
         de.post("new",use: postListMovie)
         de.put("update",use: updateListMovie)

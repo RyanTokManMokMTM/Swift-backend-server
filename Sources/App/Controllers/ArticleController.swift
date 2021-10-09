@@ -29,14 +29,12 @@ struct ArticleController: RouteCollection{
         
     }
     
-    
     //--------------------------------get某電影的討論區文章--------------------------------//
     func GetArticle(req: Request) throws -> EventLoopFuture<[Article]> {
 
         guard let movieID = req.parameters.get("movieID") as Int? else{
             throw Abort(.badRequest)
         }
-
         return  Article.query(on: req.db)
             .with(\.$user)
             .sort(\.$updatedOn, .descending)

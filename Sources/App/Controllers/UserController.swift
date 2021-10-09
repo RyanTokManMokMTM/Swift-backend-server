@@ -19,9 +19,9 @@ struct UserController: RouteCollection{
             usr.post(use: register)
         }
         
-        users.group(":UserName"){ usr in
-            usr.get(use: GetUser)
-        }
+//        users.group(":UserName"){ usr in
+//            usr.get(use: GetUser)
+//        }
         
         users.group("login"){ usr in
             usr.post(use: login)
@@ -45,7 +45,7 @@ struct UserController: RouteCollection{
             .first()
             .unwrap(or: Abort(.notFound))
             .map { usr in
-                return Me(id: UUID(),UserName: user.UserName)
+                return Me(id: usr.id ,UserName: user.UserName)
             }
     }
     
@@ -92,15 +92,15 @@ struct UserController: RouteCollection{
     }
 
     
-    func GetUser(req: Request) throws -> EventLoopFuture<Me>{
-        return User.query(on: req.db)
-            .filter(\.$UserName == req.parameters.get("UserName") ?? "NA" )
-            .first()
-            .unwrap(or: Abort(.notAcceptable))
-            .map { usr in
-                return Me(id: usr.id ,UserName: usr.UserName)
-            }
-    }
+//    func GetUser(req: Request) throws -> EventLoopFuture<Me>{
+//        return User.query(on: req.db)
+//            .filter(\.$UserName == req.parameters.get("UserName") ?? "NA" )
+//            .first()
+//            .unwrap(or: Abort(.notAcceptable))
+//            .map { usr in
+//                return Me(id: usr.id ,UserName: usr.UserName)
+//            }
+//    }
 
 
 
