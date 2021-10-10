@@ -13,7 +13,9 @@ final class ActorInfos : Model,Content{
     static let schema = "actorInfos"
     
     @ID(key: .id)
-    var id: UUID?
+    var id: UUID? //actor in
+
+    
     
     init(){
         

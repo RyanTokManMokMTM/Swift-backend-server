@@ -11,17 +11,20 @@ import Vapor
 
 
 final class PlaygroundController {
-    private let host = "https://api.themoviedb.org/3"
-    private let apiKey = "29570e7acc52b3e085ab46f6a60f0a55"
     private let genreURI = "/genre/movie/list"
-    private let decoder = JSONDecoder()
     
     func getActor(req: Request) throws -> EventLoopFuture<[Person]>{
         //return a person source
         //send request to tmdb and fetching the person data
-        guard let page = try? req.query.get(Int.self, at: "page") as Int? else {
-            throw Abort(.badRequest)
+        guard let apiKey = Environment.process.TMDB_API_KEY else{
+            throw Abort(.serviceUnavailable,reason:"API KEY ERROR")
         }
+
+        guard let host = Environment.process.TMDB_DOMAIN_NAME else{
+            throw Abort(.serviceUnavailable,reason:"DOMAIN NOT FOUND")
+        }
+
+        let page = (try? req.query.get(Int.self, at: "page") as Int) ?? 1
         
         let client = req.client
         let uri = "\(host)/person/popular?api_key=\(apiKey)&en-US&page=\(page)"
@@ -55,17 +58,26 @@ final class PlaygroundController {
          just getting data and combine data and return
          PROCESS: get All genre(futrue) -> fetch data from anthore api(desscription image)(future)
          */
+        guard let apiKey = Environment.process.TMDB_API_KEY else{
+            throw Abort(.serviceUnavailable,reason:"API KEY ERROR")
+        }
+
+        guard let host = Environment.process.TMDB_DOMAIN_NAME else{
+            throw Abort(.serviceUnavailable,reason:"DOMAIN NOT FOUND")
+        }
+
+
         let client = req.client
-        let genreURI = "\(self.host)/genre/movie/list?api_key=\(self.apiKey)&language=en-US"
+        let genreURI = "\(host)/genre/movie/list?api_key=\(apiKey)&language=en-US"
         
-      return client.get(URI(string: genreURI)).flatMap{ res -> EventLoopFuture<[DragGenreData]> in
+        return client.get(URI(string: genreURI)).flatMap{ res -> EventLoopFuture<[DragGenreData]> in
             do{
                 let resData = try res.content.decode(Genre.self)
                 let genreInfo = resData.genres
                 var genreMovieResults : [EventLoopFuture<SpecifyGenreMovieResult>] = []
     //
                 for info in genreInfo {
-                    let uri = "\(self.host)/discover/movie?api_key=\(self.apiKey)&language=en-US&sort_by=popularity.desc&page=1&with_genres=\(info.id)"
+                    let uri = "\(host)/discover/movie?api_key=\(apiKey)&language=en-US&sort_by=popularity.desc&page=1&with_genres=\(info.id)"
                     let movieInfoFuture = client.get(URI(string: uri)).flatMapThrowing{infoRes -> SpecifyGenreMovieResult in
                         return try infoRes.content.decode(SpecifyGenreMovieResult.self) //try to decode content ->body to our model
                     }
@@ -87,9 +99,15 @@ final class PlaygroundController {
     }
     
     func getDirector(req : Request) throws -> EventLoopFuture<[Person]>{
-        guard let page = try? req.query.get(Int.self, at: "page") else {
-            throw Abort(.badRequest)
+        guard let apiKey = Environment.process.TMDB_API_KEY else{
+            throw Abort(.serviceUnavailable,reason:"API KEY ERROR")
         }
+
+        guard let host = Environment.process.TMDB_DOMAIN_NAME else{
+            throw Abort(.serviceUnavailable,reason:"DOMAIN NOT FOUND")
+        }
+
+        let page = (try? req.query.get(Int.self, at: "page") as Int) ?? 1
         let client = req.client
         let uri = "\(host)/person/popular?api_key=\(apiKey)&en-US&page=\(page)"
         return client.get(URI(string: uri)).flatMapThrowing{res -> [Person] in
@@ -109,6 +127,16 @@ final class PlaygroundController {
                 throw Abort(.badRequest,reason:"API Error!")
             }
         }
+    }
+
+    func getPreviewResult(req : Request) throws -> String{
+        //this route will only send 1 result ,account to provided data
+        return "result route is coming soon..."
+    }
+
+    func getMorePreviewResult(req : Request) throws -> String{
+        //this route will send all the avaliable results
+        return "more result route is coming soon..."
     }
 }
 

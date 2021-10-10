@@ -19,7 +19,6 @@ public func configure(_ app: Application) throws {
 
     app.http.server.configuration.port = 8081
     app.databases.use(.postgres(hostname: "localhost" ,username: "postgres",password:"admin",database:"MovieDB"), as: .psql)
-
     //terminal: vapor run migrate
     app.migrations.add(CreateUser())
     app.migrations.add(CreateMovie())
@@ -37,7 +36,7 @@ public func configure(_ app: Application) throws {
     
     app.jwt.signers.use(privateSigner, kid: .private)
     app.jwt.signers.use(publicSigner, kid: .public, isDefault: true)
-    
+
     // register routes
     try routes(app)
 }
