@@ -13,6 +13,7 @@ import Vapor
 final class PlaygroundController {
     private let genreURI = "/genre/movie/list"
     
+    //this will change to load data form our database
     func getActor(req: Request) throws -> EventLoopFuture<[Person]>{
         //return a person source
         //send request to tmdb and fetching the person data
@@ -52,6 +53,7 @@ final class PlaygroundController {
         
     }
     
+    //this will change to load data form our database
     func getGenre(req : Request) throws ->  EventLoopFuture<[DragGenreData]> {
         /*TODO:
          before getting in, we need some algorithmn .....
