@@ -2,7 +2,7 @@ import Foundation
 import Fluent
 import Vapor
 
-final class GenresMovies : Model{
+final class GenresMovies : Model,Content{
     static let schema = "genres_movies"
 
     @ID(custom: "id")
@@ -16,9 +16,9 @@ final class GenresMovies : Model{
 
     init(){}
 
-    init(id:Int?,movie_ID : Movie,genre_ID : GenreModel) throws{
+    init(id:Int?,movie : Movie,genre : GenreModel) throws{
         self.id = id
-        self.$movieID.id = try movieID.requireID()
-        self.$genreID.id = try genreID.requireID()
+        self.$movieID.id = try movie.requireID()
+        self.$genreID.id = try genre.requireID()
     }
 }

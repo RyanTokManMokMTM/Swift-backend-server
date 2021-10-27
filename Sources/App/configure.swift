@@ -18,7 +18,7 @@ public func configure(_ app: Application) throws {
     // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
     app.http.server.configuration.port = 8080
-    app.databases.use(.postgres(hostname: "localhost" ,username: "postgres",password:"admin",database:"movie"), as: .psql)
+    app.databases.use(.postgres(hostname: "localhost" ,username: "postgres",password:"jackson",database:"movieDB"), as: .psql)
     //terminal: vapor run migrate
     // app.migrations.add(CreateUser())
     // app.migrations.add(CreateArticle())
@@ -26,9 +26,12 @@ public func configure(_ app: Application) throws {
     // app.migrations.add(CreateList())
     // app.migrations.add(CreateListMovie())
 
-    app.migrations.add(CreateMovie())
-    app.migrations.add(CreateGenre())
-    app.migrations.add(CreateGenresMovies())
+    // app.migrations.add(CreateMovie())
+    // app.migrations.add(CreateGenre())
+    // app.migrations.add(CreateGenresMovies())
+    // app.migrations.add(CreatePersonInfo())
+    // app.migrations.add(CreatePersonCrew())
+    // app.migrations.add(CreateMovieCharacter())
     
     //JWT private key
     let privateKey = try String(contentsOfFile: app.directory.workingDirectory + "myjwt.key")

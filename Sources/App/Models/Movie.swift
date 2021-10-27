@@ -14,7 +14,7 @@ import Vapor
 //A Movie -> more than 1 genre
 //A genre -> can have more than 1 movie
 
-final class Movie: Model {
+final class Movie: Model,Content {
     
     static let schema = "movie_infos"
     

@@ -8,50 +8,95 @@
 import Foundation
 import Fluent
 import Vapor
+import FluentPostgresDriver
 
 
 final class PlaygroundController {
     private let genreURI = "/genre/movie/list"
     
     //this will change to load data form our database
-    func getActor(req: Request) throws -> EventLoopFuture<[Person]>{
-        //return a person source
-        //send request to tmdb and fetching the person data
-        guard let apiKey = Environment.process.TMDB_API_KEY else{
-            throw Abort(.serviceUnavailable,reason:"API KEY ERROR")
+    func getActor(req: Request) throws -> EventLoopFuture<[PersonInfo]>{
+        // //getting a page number to get the data
+        guard let maxItem = Environment.process.PAGE_PER_ITEM else{
+            throw Abort(.internalServerError,reason: "INTERNAL ERROR")
+        }
+        guard  let page = (try? req.query.get(Int.self, at: "page") as Int) else {
+            throw Abort(.badRequest,reason: "PAGE MUST BE A POSITIVE NUMBER")
         }
 
-        guard let host = Environment.process.TMDB_DOMAIN_NAME else{
-            throw Abort(.serviceUnavailable,reason:"DOMAIN NOT FOUND")
+        guard let maxNum = Int(maxItem) else{
+            throw Abort(.internalServerError)
         }
+        //start at lower to upper
+        let lower = (page - 1) * maxNum
+        let hight = page * maxNum - 1
 
-        let page = (try? req.query.get(Int.self, at: "page") as Int) ?? 1
-        
-        let client = req.client
-        let uri = "\(host)/person/popular?api_key=\(apiKey)&en-US&page=\(page)"
-        return  client.get(URI(string: uri)).flatMapThrowing{ res -> [Person] in
-            do{
-                let personInfo = try res.content.decode(personResult.self)
-                let personRes = personInfo.results
-                var personsData : [Person] = []
-                for person in personRes {
-                    if person.known_for_department != nil && person.known_for_department == "Acting"{
-                        //the info is about actor
-                        //append to the list
-                        var modifyData = person
-                        modifyData.known_for = []
-                        personsData.append(modifyData)
-                        
-                    }
-                }
-                return personsData
-                
-            }catch{
-                throw Abort(.badRequest,reason:"API Error!")
-            }
-        }
-        
+        return PersonInfo.query(on: req.db).filter(\.$department == "Acting").range(lower: lower, upper: hight).all()
     }
+
+    func getDirector(req : Request) throws -> EventLoopFuture<[PersonCrew]>{
+        guard let maxItem = Environment.process.PAGE_PER_ITEM else{
+            throw Abort(.internalServerError,reason: "INTERNAL ERROR")
+        }
+        guard  let page = (try? req.query.get(Int.self, at: "page") as Int) else {
+            throw Abort(.badRequest,reason: "PAGE MUST BE A POSITIVE NUMBER")
+        }
+
+        guard let maxNum = Int(maxItem) else{
+            throw Abort(.internalServerError)
+        }
+
+        let lower = (page - 1) * maxNum
+        let hight = page * maxNum - 1
+
+        return PersonCrew.query(on: req.db)
+            .join(PersonInfo.self,on : \PersonCrew.$person.$id == \PersonInfo.$id)
+            .join(Movie.self,on : \PersonCrew.$movie.$id == \Movie.$id)
+            .filter(\.$department,.equal,"Directing")
+            .with(\.$movie)
+            .with(\.$person)
+            .range(lower: lower, upper: hight)
+            .all()
+    }
+
+    // func getActor(req: Request) throws -> EventLoopFuture<[Person]>{
+    //     //return a person source
+    //     //send request to tmdb and fetching the person data
+    //     guard let apiKey = Environment.process.TMDB_API_KEY else{
+    //         throw Abort(.serviceUnavailable,reason:"API KEY ERROR")
+    //     }
+
+    //     guard let host = Environment.process.TMDB_DOMAIN_NAME else{
+    //         throw Abort(.serviceUnavailable,reason:"DOMAIN NOT FOUND")
+    //     }
+
+    //     let page = (try? req.query.get(Int.self, at: "page") as Int) ?? 1
+        
+    //     let client = req.client
+    //     let uri = "\(host)/person/popular?api_key=\(apiKey)&en-US&page=\(page)"
+    //     return  client.get(URI(string: uri)).flatMapThrowing{ res -> [Person] in
+    //         do{
+    //             let personInfo = try res.content.decode(personResult.self)
+    //             let personRes = personInfo.results
+    //             var personsData : [Person] = []
+    //             for person in personRes {
+    //                 if person.known_for_department != nil && person.known_for_department == "Acting"{
+    //                     //the info is about actor
+    //                     //append to the list
+    //                     var modifyData = person
+    //                     modifyData.known_for = []
+    //                     personsData.append(modifyData)
+                        
+    //                 }
+    //             }
+    //             return personsData
+                
+    //         }catch{
+    //             throw Abort(.badRequest,reason:"API Error!")
+    //         }
+    //     }
+        
+    // }
     
     //this will change to load data form our database
     func getGenre(req : Request) throws ->  EventLoopFuture<[DragGenreData]> {
@@ -100,36 +145,36 @@ final class PlaygroundController {
         }
     }
     
-    func getDirector(req : Request) throws -> EventLoopFuture<[Person]>{
-        guard let apiKey = Environment.process.TMDB_API_KEY else{
-            throw Abort(.serviceUnavailable,reason:"API KEY ERROR")
-        }
+    // func getDirector(req : Request) throws -> EventLoopFuture<[Person]>{
+    //     guard let apiKey = Environment.process.TMDB_API_KEY else{
+    //         throw Abort(.serviceUnavailable,reason:"API KEY ERROR")
+    //     }
 
-        guard let host = Environment.process.TMDB_DOMAIN_NAME else{
-            throw Abort(.serviceUnavailable,reason:"DOMAIN NOT FOUND")
-        }
+    //     guard let host = Environment.process.TMDB_DOMAIN_NAME else{
+    //         throw Abort(.serviceUnavailable,reason:"DOMAIN NOT FOUND")
+    //     }
 
-        let page = (try? req.query.get(Int.self, at: "page") as Int) ?? 1
-        let client = req.client
-        let uri = "\(host)/person/popular?api_key=\(apiKey)&en-US&page=\(page)"
-        return client.get(URI(string: uri)).flatMapThrowing{res -> [Person] in
-            do{
-                let personsInfo = try res.content.decode(personResult.self)
-                let personResults = personsInfo.results
-                var director : [Person] = []
-                for info in personResults{
-                    if info.known_for_department != nil && info.known_for_department == "Art" {
-                        var modifyData = info
-                        modifyData.known_for = []
-                        director.append(modifyData)
-                    }
-                }
-                return director
-            }catch{
-                throw Abort(.badRequest,reason:"API Error!")
-            }
-        }
-    }
+    //     let page = (try? req.query.get(Int.self, at: "page") as Int) ?? 1
+    //     let client = req.client
+    //     let uri = "\(host)/person/popular?api_key=\(apiKey)&en-US&page=\(page)"
+    //     return client.get(URI(string: uri)).flatMapThrowing{res -> [Person] in
+    //         do{
+    //             let personsInfo = try res.content.decode(personResult.self)
+    //             let personResults = personsInfo.results
+    //             var director : [Person] = []
+    //             for info in personResults{
+    //                 if info.known_for_department != nil && info.known_for_department == "Art" {
+    //                     var modifyData = info
+    //                     modifyData.known_for = []
+    //                     director.append(modifyData)
+    //                 }
+    //             }
+    //             return director
+    //         }catch{
+    //             throw Abort(.badRequest,reason:"API Error!")
+    //         }
+    //     }
+    // }
 
     func getPreviewResult(req : Request) throws -> String{
         //this route will only send 1 result ,account to provided data
@@ -140,6 +185,17 @@ final class PlaygroundController {
         //this route will send all the avaliable results
         return "more result route is coming soon..."
     }
+
+    // func getTestMovie(req : Request) throws -> EventLoopFuture<[MovieCharacter]>{
+    //     //join
+    //     let personID : Int = 258
+    //     return PersonInfo.query(on: req.db)
+    //         .join(MovieCharacter.self, on: \MovieCharacter.$id == \PersonInfo.$id)
+    //         .with(\.$person)
+    //         .filter(\.$person.$id ,.equal,personID)
+    //         .all()
+            
+    // }
 }
 
 //Grag items
@@ -190,3 +246,6 @@ struct knownFor: Content{
     let poster_path: String?
 }
 
+struct MovieContent : Content{
+    
+}

@@ -2,7 +2,7 @@ import Foundation
 import Fluent
 import Vapor
 
-final class GenreModel : Model{
+final class GenreModel : Model,Content{
     static let schema = "genre_infos"
 
     @ID(custom: "id")
