@@ -25,6 +25,9 @@ final class PersonInfo: Model,Content {
     @Field(key:"department")
     var department : String
 
+    @Field(key:"name")
+    var name : String
+
     @Field(key:"popularity")
     var popularity : Float64
 

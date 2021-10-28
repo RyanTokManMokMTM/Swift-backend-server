@@ -11,6 +11,7 @@ struct CreatePersonInfo: Migration{
             .field("adult",.bool)
             .field("gender",.int)
             .field("department",.string)
+            .field("name",.string)
             .field("popularity", .custom("numeric"))
             .field("profile_path",.string)
             .create()

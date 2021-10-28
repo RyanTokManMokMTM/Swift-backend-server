@@ -34,29 +34,32 @@ final class PlaygroundController {
         return PersonInfo.query(on: req.db).filter(\.$department == "Acting").range(lower: lower, upper: hight).all()
     }
 
-    func getDirector(req : Request) throws -> EventLoopFuture<[PersonCrew]>{
-        guard let maxItem = Environment.process.PAGE_PER_ITEM else{
-            throw Abort(.internalServerError,reason: "INTERNAL ERROR")
-        }
-        guard  let page = (try? req.query.get(Int.self, at: "page") as Int) else {
-            throw Abort(.badRequest,reason: "PAGE MUST BE A POSITIVE NUMBER")
-        }
+    func getDirector(req : Request) throws -> EventLoopFuture<[PersonInfo]>{
+        // guard let maxItem = Environment.process.PAGE_PER_ITEM else{
+        //     throw Abort(.internalServerError,reason: "INTERNAL ERROR")
+        // }
+        // guard  let page = (try? req.query.get(Int.self, at: "page") as Int) else {
+        //     throw Abort(.badRequest,reason: "PAGE MUST BE A POSITIVE NUMBER")
+        // }
 
-        guard let maxNum = Int(maxItem) else{
-            throw Abort(.internalServerError)
-        }
+        // guard let maxNum = Int(maxItem) else{
+        //     throw Abort(.internalServerError)
+        // }
 
-        let lower = (page - 1) * maxNum
-        let hight = page * maxNum - 1
+        // guard let person = (try? req.query.get(Int.self,at:"personid") as Int) else {
+        //     throw Abort(.badRequest,reason: "personID must a int")
+        // }
 
-        return PersonCrew.query(on: req.db)
-            .join(PersonInfo.self,on : \PersonCrew.$person.$id == \PersonInfo.$id)
-            .join(Movie.self,on : \PersonCrew.$movie.$id == \Movie.$id)
-            .filter(\.$department,.equal,"Directing")
-            .with(\.$movie)
-            .with(\.$person)
-            .range(lower: lower, upper: hight)
-            .all()
+        // let lower = (page - 1) * maxNum
+        // let hight = page * maxNum - 1
+
+        let postSQL = (req.db as! PostgresDatabase).sql()
+        //group with person id and department
+        let sql = "SELECT person_infos.adult,person_infos.gender,person_infos.id,person_infos.name,person_infos.popularity,person_infos.profile_path,crews.department FROM (SELECT person_id , department FROM person_crews WHERE department = 'Production' GROUP BY (person_id,department)) AS crews INNER JOIN person_infos ON person_infos.id =  crews.person_id ORDER BY person_id ASC LIMIT 10 "
+        return postSQL.raw(SQLQueryString(sql)).all(decoding: PersonInfo.self)
+
+
+
     }
 
     // func getActor(req: Request) throws -> EventLoopFuture<[Person]>{
