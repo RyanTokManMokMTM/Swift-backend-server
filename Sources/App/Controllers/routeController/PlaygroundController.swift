@@ -10,7 +10,6 @@ import Fluent
 import Vapor
 import FluentPostgresDriver
 
-
 final class PlaygroundController {
     private let genreURI = "/genre/movie/list"
     
@@ -34,33 +33,39 @@ final class PlaygroundController {
         return PersonInfo.query(on: req.db).filter(\.$department == "Acting").range(lower: lower, upper: hight).all()
     }
 
+    //http://127.0.0.1:8080/api/playground/getDirector?page=1s
     func getDirector(req : Request) throws -> EventLoopFuture<[PersonInfo]>{
-        // guard let maxItem = Environment.process.PAGE_PER_ITEM else{
-        //     throw Abort(.internalServerError,reason: "INTERNAL ERROR")
-        // }
-        // guard  let page = (try? req.query.get(Int.self, at: "page") as Int) else {
-        //     throw Abort(.badRequest,reason: "PAGE MUST BE A POSITIVE NUMBER")
-        // }
+        guard let maxItem = Environment.process.PAGE_PER_ITEM else{
+            throw Abort(.internalServerError,reason: "INTERNAL ERROR")
+        }
 
         // guard let maxNum = Int(maxItem) else{
-        //     throw Abort(.internalServerError)
+        //    throw Abort(.internalServerError,reason: "INTERNAL ERROR")
         // }
 
-        // guard let person = (try? req.query.get(Int.self,at:"personid") as Int) else {
-        //     throw Abort(.badRequest,reason: "personID must a int")
-        // }
-
-        // let lower = (page - 1) * maxNum
-        // let hight = page * maxNum - 1
-
+        let page = abs((try? req.query.get(Int.self, at: "page") as Int) ?? 1 )//default 1
+        let pageOffset = 10
+        let offset = (page - 1) * pageOffset //if the page is 1 => offset 0 
         let postSQL = (req.db as! PostgresDatabase).sql()
-        //group with person id and department
-        let sql = "SELECT person_infos.adult,person_infos.gender,person_infos.id,person_infos.name,person_infos.popularity,person_infos.profile_path,crews.department FROM (SELECT person_id , department FROM person_crews WHERE department = 'Production' GROUP BY (person_id,department)) AS crews INNER JOIN person_infos ON person_infos.id =  crews.person_id ORDER BY person_id ASC LIMIT 10 "
+
+        let sql = """
+        SELECT person_infos.adult,person_infos.gender,person_infos.id,person_infos.name,person_infos.popularity,person_infos.profile_path,crews.department 
+        FROM (SELECT person_id , department FROM person_crews WHERE department = 'Directing' 
+        GROUP BY (person_id,department)) AS crews INNER JOIN person_infos ON person_infos.id =  crews.person_id ORDER BY person_id ASC LIMIT \(maxItem) OFFSET \(offset)
+        """
+        // print(sql)
         return postSQL.raw(SQLQueryString(sql)).all(decoding: PersonInfo.self)
+    }
 
-
+    func getGenre(req : Request) throws ->  String {
+        //join 2 table -> this will
+        // let api = APIGenreResponse(id:1)
+        return ""
 
     }
+
+
+    
 
     // func getActor(req: Request) throws -> EventLoopFuture<[Person]>{
     //     //return a person source
@@ -102,51 +107,51 @@ final class PlaygroundController {
     // }
     
     //this will change to load data form our database
-    func getGenre(req : Request) throws ->  EventLoopFuture<[DragGenreData]> {
-        /*TODO:
-         before getting in, we need some algorithmn .....
-         just getting data and combine data and return
-         PROCESS: get All genre(futrue) -> fetch data from anthore api(desscription image)(future)
-         */
-        guard let apiKey = Environment.process.TMDB_API_KEY else{
-            throw Abort(.serviceUnavailable,reason:"API KEY ERROR")
-        }
+    // func getGenre(req : Request) throws ->  EventLoopFuture<[DragGenreData]> {
+    //     /*TODO:
+    //      before getting in, we need some algorithmn .....
+    //      just getting data and combine data and return
+    //      PROCESS: get All genre(futrue) -> fetch data from anthore api(desscription image)(future)
+    //      */
+    //     guard let apiKey = Environment.process.TMDB_API_KEY else{
+    //         throw Abort(.serviceUnavailable,reason:"API KEY ERROR")
+    //     }
 
-        guard let host = Environment.process.TMDB_DOMAIN_NAME else{
-            throw Abort(.serviceUnavailable,reason:"DOMAIN NOT FOUND")
-        }
+    //     guard let host = Environment.process.TMDB_DOMAIN_NAME else{
+    //         throw Abort(.serviceUnavailable,reason:"DOMAIN NOT FOUND")
+    //     }
 
 
-        let client = req.client
-        let genreURI = "\(host)/genre/movie/list?api_key=\(apiKey)&language=en-US"
+    //     let client = req.client
+    //     let genreURI = "\(host)/genre/movie/list?api_key=\(apiKey)&language=en-US"
         
-        return client.get(URI(string: genreURI)).flatMap{ res -> EventLoopFuture<[DragGenreData]> in
-            do{
-                let resData = try res.content.decode(Genre.self)
-                let genreInfo = resData.genres
-                var genreMovieResults : [EventLoopFuture<SpecifyGenreMovieResult>] = []
-    //
-                for info in genreInfo {
-                    let uri = "\(host)/discover/movie?api_key=\(apiKey)&language=en-US&sort_by=popularity.desc&page=1&with_genres=\(info.id)"
-                    let movieInfoFuture = client.get(URI(string: uri)).flatMapThrowing{infoRes -> SpecifyGenreMovieResult in
-                        return try infoRes.content.decode(SpecifyGenreMovieResult.self) //try to decode content ->body to our model
-                    }
-                    genreMovieResults.append(movieInfoFuture)
-                }
+    //     return client.get(URI(string: genreURI)).flatMap{ res -> EventLoopFuture<[DragGenreData]> in
+    //         do{
+    //             let resData = try res.content.decode(Genre.self)
+    //             let genreInfo = resData.genres
+    //             var genreMovieResults : [EventLoopFuture<SpecifyGenreMovieResult>] = []
+    // //
+    //             for info in genreInfo {
+    //                 let uri = "\(host)/discover/movie?api_key=\(apiKey)&language=en-US&sort_by=popularity.desc&page=1&with_genres=\(info.id)"
+    //                 let movieInfoFuture = client.get(URI(string: uri)).flatMapThrowing{infoRes -> SpecifyGenreMovieResult in
+    //                     return try infoRes.content.decode(SpecifyGenreMovieResult.self) //try to decode content ->body to our model
+    //                 }
+    //                 genreMovieResults.append(movieInfoFuture)
+    //             }
                 
-               return genreMovieResults.flatten(on: req.eventLoop).map{info -> [DragGenreData] in
-                    var dragResult : [DragGenreData] = []
-                    for i in 0..<info.count{
-                        let result = DragGenreData(info: genreInfo[i], describeImg: info[i].results.randomElement()!.poster_path)
-                        dragResult.append(result)
-                    }
-                    return dragResult
-                }
-            } catch{
-                return req.eventLoop.makeFailedFuture(error)
-            }
-        }
-    }
+    //            return genreMovieResults.flatten(on: req.eventLoop).map{info -> [DragGenreData] in
+    //                 var dragResult : [DragGenreData] = []
+    //                 for i in 0..<info.count{
+    //                     let result = DragGenreData(info: genreInfo[i], describeImg: info[i].results.randomElement()!.poster_path)
+    //                     dragResult.append(result)
+    //                 }
+    //                 return dragResult
+    //             }
+    //         } catch{
+    //             return req.eventLoop.makeFailedFuture(error)
+    //         }
+    //     }
+    // }
     
     // func getDirector(req : Request) throws -> EventLoopFuture<[Person]>{
     //     guard let apiKey = Environment.process.TMDB_API_KEY else{

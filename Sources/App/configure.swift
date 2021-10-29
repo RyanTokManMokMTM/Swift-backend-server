@@ -15,14 +15,13 @@ extension JWKIdentifier{
 // configures your application
 public func configure(_ app: Application) throws {
     // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-
+    app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    print(app.directory.publicDirectory)
     app.http.server.configuration.port = 8080
     app.databases.use(.postgres(hostname: "localhost" ,username: "postgres",password:"jackson",database:"movieDB"), as: .psql)
     //terminal: vapor run migrate
     // app.migrations.add(CreateUser())
     // app.migrations.add(CreateArticle())
-    // app.migrations.add(CreateComment())
     // app.migrations.add(CreateList())
     // app.migrations.add(CreateListMovie())
 
