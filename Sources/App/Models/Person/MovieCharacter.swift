@@ -39,7 +39,7 @@ final class MovieCharacter: Model,Content {
         self.id = id
         self.character = character
         self.creditId = creditId
-        self.order = order
+        self.order = Order
         self.$person.id = try person.requireID()
         self.$movie.id = try movie.requireID()
     }

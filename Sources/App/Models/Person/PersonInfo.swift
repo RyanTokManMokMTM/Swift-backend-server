@@ -49,7 +49,7 @@ final class PersonInfo: Model,Content {
         gender : Int,
         department : String,
         popularity : Float64,
-        profile_path : String
+        profilePath : String
     ){
         self.id = id
         self.adult = adult

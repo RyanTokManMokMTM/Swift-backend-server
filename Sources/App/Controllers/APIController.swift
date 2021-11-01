@@ -22,10 +22,13 @@ struct APIController : RouteCollection{
         let searchAPI = api.grouped("search")
         
         //playground controller
-        playgroundAPI.get("getGenre", use: playgroundControllor.getGenre(req:))
-        playgroundAPI.get("getActor", use: playgroundControllor.getActor(req:))
-        playgroundAPI.get("getDirector", use: playgroundControllor.getDirector(req:))
-        playgroundAPI.get("getPreview", use: playgroundControllor.getPreviewResult(req:))
+        playgroundAPI.get("getgenre", use: playgroundControllor.getGenreById(req:))
+        playgroundAPI.get("getallgenres", use: playgroundControllor.getGenreAll(req:))
+        playgroundAPI.get("getactors", use: playgroundControllor.getActor(req:))
+        playgroundAPI.get("getdirectors", use: playgroundControllor.getDirector(req:))
+        
+        //Post data
+        playgroundAPI.post("getseachpreview",use : playgroundControllor.postPreviewResult(req:))
         
         //searching controller
         searchAPI.get("getSearchList",":keyWord",use:seachingController.getSearchingResult(req:))

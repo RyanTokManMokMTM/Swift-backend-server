@@ -18,7 +18,7 @@ public func configure(_ app: Application) throws {
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     print(app.directory.publicDirectory)
     app.http.server.configuration.port = 8080
-    app.databases.use(.postgres(hostname: "localhost" ,username: "postgres",password:"jackson",database:"movieDB"), as: .psql)
+    app.databases.use(.postgres(hostname: "localhost" ,username: "postgres",password:"admin",database:"MovieDB"), as: .psql)
     //terminal: vapor run migrate
     // app.migrations.add(CreateUser())
     // app.migrations.add(CreateArticle())
