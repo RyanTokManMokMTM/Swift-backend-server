@@ -17,7 +17,7 @@ public func configure(_ app: Application) throws {
     // uncomment to serve files from /Public folder
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     print(app.directory.publicDirectory)
-    app.http.server.configuration.port = 8080
+    app.http.server.configuration.port = 8081
     app.databases.use(.postgres(hostname: "localhost" ,username: "postgres",password:"admin",database:"MovieDB"), as: .psql)
     //terminal: vapor run migrate
     // app.migrations.add(CreateUser())

@@ -23,12 +23,13 @@ struct CreateMovie: Migration{
             .field("poster_path",.string)
             .field("release_date",.string)
             .field("title",.string)
+            .field("run_time",.int)
             .field("video",.bool)
             .field("vote_average",.custom("numeric"))
             .field("vote_count",.int)
-            .field("created_at",.datetime)
-            .field("updated_at",.datetime)
-            .field("deleted_at",.datetime)
+//            .field("created_at",.datetime)
+//            .field("updated_at",.datetime)
+//            .field("deleted_at",.datetime)
             .create()
     }
     

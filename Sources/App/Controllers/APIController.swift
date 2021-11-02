@@ -28,7 +28,12 @@ struct APIController : RouteCollection{
         playgroundAPI.get("getdirectors", use: playgroundControllor.getDirector(req:))
         
         //Post data
-        playgroundAPI.post("getseachpreview",use : playgroundControllor.postPreviewResult(req:))
+        let previewMiddware = playgroundAPI.grouped(PreviewResultAlgorithmMiddleware())
+        previewMiddware.post("getpreview",use : playgroundControllor.postPreviewResult(req:))
+        
+        
+        playgroundAPI.get("test", use: playgroundControllor.postPreviewResult(req:))
+//        playgroundAPI.post("getpreview",use : playgroundControllor.postPreviewResult(req:))
         
         //searching controller
         searchAPI.get("getSearchList",":keyWord",use:seachingController.getSearchingResult(req:))

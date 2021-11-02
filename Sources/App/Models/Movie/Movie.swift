@@ -51,6 +51,9 @@ final class Movie: Model,Content {
 
     @Field(key:"title")
     var title : String
+    
+    @Field(key:"run_time")
+    var runTime : Int //mins
 
     @Field(key:"video")
     var video : Bool
@@ -62,16 +65,16 @@ final class Movie: Model,Content {
     var voteCount : Int
 
     //required?
-    @Timestamp(key:"created_at",on:.create)
-    var createdAt : Date?
-
-   //required?
-    @Timestamp(key:"updated_at",on:.update)
-    var updatedAt : Date?
-
-   //required?
-    @Timestamp(key:"deleted_at",on:.delete)
-    var deletedAt : Date?
+//    @Timestamp(key:"created_at",on:.create)
+//    var createdAt : Date?
+//
+//   //required?
+//    @Timestamp(key:"updated_at",on:.update)
+//    var updatedAt : Date?
+//
+//   //required?
+//    @Timestamp(key:"deleted_at",on:.delete)
+//    var deletedAt : Date?
 
     @Siblings(through: GenresMovies.self, from: \.$movieID, to: \.$genreID)
     public var genres: [GenreModel]
@@ -89,12 +92,13 @@ final class Movie: Model,Content {
         posterPath:String,
         releaseDate:String,
         title:String,
+        runTime : Int,
         video:Bool,
         voteAverage:Float64,
-        voteCount : Int,
-        createdAt : Date?,
-        updatedAt : Date?,
-        deletedAt : Date?
+        voteCount : Int
+//        createdAt : Date?,
+//        updatedAt : Date?,
+//        deletedAt : Date?
     ){
         self.id = id
         self.adult = adult
@@ -104,12 +108,13 @@ final class Movie: Model,Content {
         self.popularity = popularity
         self.posterPath = posterPath
         self.releaseDate = releaseDate
+        self.runTime = runTime
         self.title = title
         self.video = video
         self.voteAverage = voteAverage
         self.voteCount = voteCount
-        self.createdAt = createdAt
-        self.updatedAt = updatedAt
-        self.deletedAt = deletedAt
+//        self.createdAt = createdAt
+//        self.updatedAt = updatedAt
+//        self.deletedAt = deletedAt
     }
 }

@@ -2,11 +2,13 @@ import Foundation
 import Fluent
 import Vapor
 
-
+//Person list []
+// Actor : [Person] -> known_for_department : Acting
+// Director : [Person] -> known_for_department : Direcotr
 struct PersonData: Content {
     var id:Int
     var name: String
-    var known_for_department: String?
+    var known_for_department: String? //
     var profile_path: String?
 }
 
@@ -16,7 +18,7 @@ struct GenreInfo : Content {
     var describe_img : String //using any image which movie can describe this Genre (URL)
 }
 
-struct GenreData : Content{
+struct GenreData : Content,Identifiable{
     let id : Int
     let name : String
 }
@@ -28,4 +30,25 @@ struct PersonInfoResponse : Content{
 struct GenreInfoResponse : Content {
     var response : [GenreInfo]
 }
+
+struct PreviewDataInfo : Identifiable, Content{
+    let id : String
+    let itemType : PreviewInfo //descrip what data in used
+    let genreData : GenreInfo? //only for genre
+    let personData : PersonDataInfo? //only for actor and director
+}
+
+struct PersonDataInfo : Content,Identifiable {
+    let id:Int
+    let name: String
+    let known_for_department: String
+    let profile_path: String?
+}
+
+enum PreviewInfo : String,Content{
+    case Actor = "Actor"
+    case Director = "Director"
+    case Genre = "Genre"
+}
+
 

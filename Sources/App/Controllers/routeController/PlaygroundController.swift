@@ -137,61 +137,91 @@ final class PlaygroundController {
         }
     }
     
-    func postPreviewResult(req : Request) throws -> String{
-        //this route will send all the avaliable results\
-        //Receive a collection of movie and return a movie
-        return "more result route is coming soon..."
+    func getPreviewMovie(req : Request) throws -> String{
+        return "test"
+    }
+    
+    func postPreviewResult(req : Request) throws -> EventLoopFuture<MoviePreviewInfo>{
+        // front will send a item Collectionx
+        //return just one movie for user preview
+        
+        //Testing!!
+        guard let postgresSql = (req.db as? PostgresDatabase)?.sql() else {
+            throw Abort(.internalServerError,reason:"DB INTERNAL ERROR")
+        }
+        
+        guard let movieID = req.headers["movie_id"].first else{
+            req.logger.debug("MOVIE ID IS EMPTY")
+            return req.eventLoop.future(MoviePreviewInfo(id: nil, title: nil, poster_path: nil, overview: nil, run_time: nil, release_date: nil, original_language: nil, genres: nil, casts: nil))
+        }
+        
+        //Select a movie from db
+        let movieSQL = """
+                SELECT movie_infos."id",movie_infos.title,movie_infos.poster_path,movie_infos.overview,movie_infos.release_date,movie_infos.run_time,movie_infos.original_language
+                FROM movie_infos
+                WHERE movie_infos."id" = \(movieID)
+        """
+        
+        return postgresSql.raw(SQLQueryString(movieSQL)).first(decoding: PreviewMovieInfo.self).flatMap{movieResult -> EventLoopFuture<MoviePreviewInfo> in
+                let id = movieResult!.id
+            
+                let genreSQL = """
+                    SELECT genre_infos."id",genre_infos."name" FROM genres_movies
+                    INNER JOIN genre_infos ON genre_infos."id" = genres_movies.genre_info_id
+                    WHERE genres_movies.movie_info_id = \(id);
+                """
+
+           return postgresSql.raw(SQLQueryString(genreSQL)).all(decoding: GenreData.self).flatMap{genres -> EventLoopFuture<MoviePreviewInfo> in
+                
+                let castSQL = """
+                   SELECT movie_characters.id,person_infos."name",movie_characters."character" from movie_characters
+                   INNER JOIN movie_infos ON movie_infos.id = movie_characters.movie_id
+                   INNER JOIN person_infos ON person_infos.id = movie_characters.person_id
+                   WHERE movie_infos."id" = \(id) ORDER BY "order" LIMIT 3;
+                """
+            
+                return postgresSql.raw(SQLQueryString(castSQL)).all(decoding: MovieCast.self).map{casts -> MoviePreviewInfo in
+                    return MoviePreviewInfo(id: movieResult!.id, title: movieResult!.title, poster_path: movieResult!.poster_path, overview: movieResult!.overview, run_time: movieResult!.run_time, release_date: movieResult!.release_date, original_language: movieResult!.original_language, genres: genres, casts: casts)
+                }
+           }
+//
+//
+        }
+
+//        return ""
     }
 }
 
-//Grag items
-//struct GenreData : Content {
-//    let id : Int
-//    let name : String
-//}
-//
-//struct Genre : Content{
-//    let genres : [GenreData]
-//}
-//
-//struct DragGenreData : Content {
-//    let info : GenreData
-//    let describeImg : String //using any image which movie can describe this Genre (URL)
-//}
-//
-//struct SpecifyGenreMovieResult: Content{
-//    let page : Int
-//    let results : [GenreMovieInfo]
-//}
-//
-//struct GenreMovieInfo : Content{
-//    let poster_path : String
-//}
-//
-//
-////Actor items
-//
-//
-////director items
-//struct personResult : Content{
-//    let results : [Person]
-//}
-//
-//struct Person: Content {
-//    let id:Int
-//    let name: String
-//    let known_for_department: String?
-//    let profile_path: String?
-//    var known_for: [knownFor]
-//}
-//
-//struct knownFor: Content{
-//    let id: Int
-//    let title: String?      //電影名稱可能被放在title也可能被放在name
-//    let name: String?
-//    let poster_path: String?
-//}
-//
-//struct MovieContent : Content{
-//    
-//}
+struct AlgorithmFormatJSON : Content{
+    var Genres : [GenreInfo]
+    var Actors : [PersonDataInfo]
+    var Directors : [PersonDataInfo]
+}
+
+struct PreviewMovieInfo : Content {
+    let id: Int
+    let title: String
+    let poster_path: String?
+    let overview: String
+    let run_time: Int
+    let release_date: String?
+    let original_language: String
+}
+
+struct MoviePreviewInfo : Content{
+    let id: Int?
+    let title: String?
+    let poster_path: String?
+    let overview: String?
+    let run_time: Int?
+    let release_date: String?
+    let original_language: String?
+    let genres : [GenreData]?
+    let casts : [MovieCast]?
+}
+
+struct MovieCast: Content, Identifiable {
+    let id: Int
+    let character: String
+    let name: String
+}
