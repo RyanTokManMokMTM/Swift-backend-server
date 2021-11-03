@@ -137,7 +137,9 @@ final class PlaygroundController {
         }
     }
     
-    func getPreviewMovie(req : Request) throws -> String{
+    func getPreviewMovieList(req : Request) throws -> String{
+        //Get more preview movie list
+        
         return "test"
     }
     

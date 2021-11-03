@@ -39,6 +39,8 @@ struct PreviewResultAlgorithmMiddleware : Middleware {
             return req.eventLoop.future(error: Abort(.badRequest,reason:"DB INTERNAL ERROR"))
         }
         
+        
+        
         let movieTempSql = """
             SELECT id FROM movie_infos ORDER BY RANDOM() LIMIT 1 ;
         """
