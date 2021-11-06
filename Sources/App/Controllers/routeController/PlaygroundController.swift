@@ -137,10 +137,21 @@ final class PlaygroundController {
         }
     }
     
-    func getPreviewMovieList(req : Request) throws -> String{
-        //Get more preview movie list
+    func getPreviewMovieList(req : Request) throws -> EventLoopFuture<[MoviePreviewInfo]>{
+        //TODO - Will only send 20 datas which are approperate to current user
+        guard let maxItem = Environment.process.PAGE_PER_ITEM else{
+            throw Abort(.internalServerError,reason: "INTERNAL ERROR")
+        }
         
-        return "test"
+        guard let postgresSQL = (req.db as? PostgresDatabase)?.sql() else {
+            throw Abort(.internalServerError,reason:"DB INTERNAL ERROR")
+        }
+
+        let sql = """
+        SELECT  movie_infos."id",movie_infos.title,movie_infos.poster_path,movie_infos.overview,movie_infos.vote_average FROM movie_infos
+        ORDER BY RANDOM() LIMIT \(maxItem) ;
+        """
+        return postgresSQL.raw(SQLQueryString(sql)).all(decoding: MoviePreviewInfo.self)
     }
     
     func postPreviewResult(req : Request) throws -> EventLoopFuture<MoviePreviewInfo>{
@@ -152,45 +163,38 @@ final class PlaygroundController {
             throw Abort(.internalServerError,reason:"DB INTERNAL ERROR")
         }
         
+        
         guard let movieID = req.headers["movie_id"].first else{
-            req.logger.debug("MOVIE ID IS EMPTY")
-            return req.eventLoop.future(MoviePreviewInfo(id: nil, title: nil, poster_path: nil, overview: nil, run_time: nil, release_date: nil, original_language: nil, genres: nil, casts: nil))
+            throw Abort(.internalServerError)
         }
         
-        //Select a movie from db
         let movieSQL = """
-                SELECT movie_infos."id",movie_infos.title,movie_infos.poster_path,movie_infos.overview,movie_infos.release_date,movie_infos.run_time,movie_infos.original_language
-                FROM movie_infos
-                WHERE movie_infos."id" = \(movieID)
+             SELECT
+                table1.*,
+                (string_to_array(string_agg(person_infos."name" ,',' ORDER BY movie_characters."order" asc), ','))[1:3] as casts
+             FROM (SELECT  movie_infos."id",movie_infos.title,movie_infos.poster_path,movie_infos.overview,movie_infos.release_date,movie_infos.run_time,movie_infos.original_language,string_to_array(string_agg(genre_infos.name, ','), ',') as genres FROM genres_movies
+            INNER JOIN
+                genre_infos ON genre_infos."id" = genres_movies.genre_info_id
+            INNER JOIN
+                movie_infos ON movie_infos."id" = genres_movies.movie_info_id
+            WHERE movie_info_id = \(movieID)
+            GROUP BY
+            (movie_infos."id",movie_infos.title,movie_infos.poster_path,movie_infos.overview,movie_infos.release_date,movie_infos.run_time,movie_infos.original_language)) as table1
+            INNER JOIN
+                movie_characters ON table1."id" = movie_characters.movie_id
+            INNER JOIN
+                person_infos ON person_infos.id = movie_characters.person_id
+            GROUP BY (table1.id,table1.genres,table1.original_language,table1.original_language,table1.overview,table1.poster_path,table1.release_date,table1.run_time,table1.title)
+            LIMIT 1
         """
         
-        return postgresSql.raw(SQLQueryString(movieSQL)).first(decoding: PreviewMovieInfo.self).flatMap{movieResult -> EventLoopFuture<MoviePreviewInfo> in
-                let id = movieResult!.id
-            
-                let genreSQL = """
-                    SELECT genre_infos."id",genre_infos."name" FROM genres_movies
-                    INNER JOIN genre_infos ON genre_infos."id" = genres_movies.genre_info_id
-                    WHERE genres_movies.movie_info_id = \(id);
-                """
-
-           return postgresSql.raw(SQLQueryString(genreSQL)).all(decoding: GenreData.self).flatMap{genres -> EventLoopFuture<MoviePreviewInfo> in
-                
-                let castSQL = """
-                   SELECT movie_characters.id,person_infos."name",movie_characters."character" from movie_characters
-                   INNER JOIN movie_infos ON movie_infos.id = movie_characters.movie_id
-                   INNER JOIN person_infos ON person_infos.id = movie_characters.person_id
-                   WHERE movie_infos."id" = \(id) ORDER BY "order" LIMIT 3;
-                """
-            
-                return postgresSql.raw(SQLQueryString(castSQL)).all(decoding: MovieCast.self).map{casts -> MoviePreviewInfo in
-                    return MoviePreviewInfo(id: movieResult!.id, title: movieResult!.title, poster_path: movieResult!.poster_path, overview: movieResult!.overview, run_time: movieResult!.run_time, release_date: movieResult!.release_date, original_language: movieResult!.original_language, genres: genres, casts: casts)
+        return postgresSql.raw(SQLQueryString(movieSQL)).first(decoding: MoviePreviewInfo.self)
+            .flatMapThrowing{result -> MoviePreviewInfo in
+                guard let previewInfo = result else{
+                    throw Abort(.badRequest,reason:"NO MOVIE IS FOUND....")
                 }
-           }
-//
-//
-        }
-
-//        return ""
+                return previewInfo
+            }
     }
 }
 
@@ -200,30 +204,22 @@ struct AlgorithmFormatJSON : Content{
     var Directors : [PersonDataInfo]
 }
 
-struct PreviewMovieInfo : Content {
+struct MoviePreviewInfo : Content{
     let id: Int
     let title: String
     let poster_path: String?
     let overview: String
-    let run_time: Int
-    let release_date: String?
-    let original_language: String
-}
-
-struct MoviePreviewInfo : Content{
-    let id: Int?
-    let title: String?
-    let poster_path: String?
-    let overview: String?
     let run_time: Int?
     let release_date: String?
     let original_language: String?
-    let genres : [GenreData]?
-    let casts : [MovieCast]?
+    let genres : [String]?
+    let casts : [String]?
+    let vote_average: Double? //Preview no need the info
+    let vote_count: Int? //Preview no need the info
 }
 
-struct MovieCast: Content, Identifiable {
-    let id: Int
-    let character: String
-    let name: String
-}
+//struct MovieCast: Content, Identifiable {
+//    let id: Int
+//    let character: String
+//    let name: String
+//}

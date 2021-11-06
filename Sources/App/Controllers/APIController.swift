@@ -31,8 +31,10 @@ struct APIController : RouteCollection{
         let previewMiddware = playgroundAPI.grouped(PreviewResultAlgorithmMiddleware())
         previewMiddware.post("getpreview",use : playgroundControllor.postPreviewResult(req:))
         
+        playgroundAPI.get("getpreviewlist", use: playgroundControllor.getPreviewMovieList(req:))
         
-        playgroundAPI.get("test", use: playgroundControllor.postPreviewResult(req:))
+        
+//        playgroundAPI.get("test", use: playgroundControllor.postPreviewResult(req:))
 //        playgroundAPI.post("getpreview",use : playgroundControllor.postPreviewResult(req:))
         
         //searching controller

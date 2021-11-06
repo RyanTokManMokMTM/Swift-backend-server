@@ -101,6 +101,15 @@
         }
       },
       {
+        "package": "PythonKit",
+        "repositoryURL": "https://github.com/pvieito/PythonKit.git",
+        "state": {
+          "branch": null,
+          "revision": "074622c6893188bbb7926eee2f7eece8a5124c47",
+          "version": "0.1.0"
+        }
+      },
+      {
         "package": "routing-kit",
         "repositoryURL": "https://github.com/vapor/routing-kit.git",
         "state": {
