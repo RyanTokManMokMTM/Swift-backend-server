@@ -17,13 +17,13 @@ public func configure(_ app: Application) throws {
     // uncomment to serve files from /Public folder
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     print(app.directory.publicDirectory)
-    app.http.server.configuration.port = 8081
+    app.http.server.configuration.port = 8080
     app.databases.use(.postgres(hostname: "localhost" ,username: "postgres",password:"admin",database:"MovieDB"), as: .psql)
     //terminal: vapor run migrate
-    // app.migrations.add(CreateUser())
-    // app.migrations.add(CreateArticle())
-    // app.migrations.add(CreateList())
-    // app.migrations.add(CreateListMovie())
+     app.migrations.add(CreateUser())
+     app.migrations.add(CreateArticle())
+     app.migrations.add(CreateList())
+     app.migrations.add(CreateListMovie())
 
     // app.migrations.add(CreateMovie())
     // app.migrations.add(CreateGenre())

@@ -51,4 +51,14 @@ enum PreviewInfo : String,Content{
     case Genre = "Genre"
 }
 
+//Movie Card
+struct MovieCardInfo : Content{
+    let id : Int
+    let title : String
+    let poster : String
+    let vote_average : Double
+}
 
+struct MovieCardInfoResponse : Content{
+    var results : [MovieCardInfo]
+}
