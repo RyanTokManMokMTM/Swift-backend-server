@@ -33,7 +33,7 @@ struct GenreInfoResponse : Content {
 
 struct PreviewDataInfo : Identifiable, Content{
     let id : String
-    let itemType : PreviewInfo //descrip what data in used
+    let itemType : PreviewInfo? //descrip what data in used
     let genreData : GenreInfo? //only for genre
     let personData : PersonDataInfo? //only for actor and director
 }
@@ -62,3 +62,15 @@ struct MovieCardInfo : Content{
 struct MovieCardInfoResponse : Content{
     var results : [MovieCardInfo]
 }
+
+
+struct SearchRef : Content{
+    let id : Int
+    let type : RefType
+}
+
+enum RefType :Content{
+    case Persons
+    case Genre
+}
+

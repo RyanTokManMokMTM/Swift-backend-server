@@ -154,7 +154,7 @@ final class PlaygroundController {
         return postgresSQL.raw(SQLQueryString(sql)).all(decoding: MoviePreviewInfo.self)
     }
     
-    func postPreviewResult(req : Request) throws -> EventLoopFuture<MoviePreviewInfo>{
+    func postPreviewResult(req : Request) throws -> EventLoopFuture<[MoviePreviewInfo]>{
         // front will send a item Collectionx
         //return just one movie for user preview
         
@@ -162,38 +162,42 @@ final class PlaygroundController {
         guard let postgresSql = (req.db as? PostgresDatabase)?.sql() else {
             throw Abort(.internalServerError,reason:"DB INTERNAL ERROR")
         }
-        
-        
-        guard let movieID = req.headers["movie_id"].first else{
+
+        guard let movieIDs = req.headers["refMovieIds"].first else{
             throw Abort(.internalServerError)
         }
         
+        if movieIDs.isEmpty{
+            throw Abort(.noContent,reason:"NO MOVIE IS FOUND....")
+        }
+        
         let movieSQL = """
-             SELECT
-                table1.*,
-                (string_to_array(string_agg(person_infos."name" ,',' ORDER BY movie_characters."order" asc), ','))[1:3] as casts
-             FROM (SELECT  movie_infos."id",movie_infos.title,movie_infos.poster_path,movie_infos.overview,movie_infos.release_date,movie_infos.run_time,movie_infos.original_language,string_to_array(string_agg(genre_infos.name, ','), ',') as genres FROM genres_movies
-            INNER JOIN
-                genre_infos ON genre_infos."id" = genres_movies.genre_info_id
-            INNER JOIN
-                movie_infos ON movie_infos."id" = genres_movies.movie_info_id
-            WHERE movie_info_id = \(movieID)
-            GROUP BY
-            (movie_infos."id",movie_infos.title,movie_infos.poster_path,movie_infos.overview,movie_infos.release_date,movie_infos.run_time,movie_infos.original_language)) as table1
-            INNER JOIN
-                movie_characters ON table1."id" = movie_characters.movie_id
-            INNER JOIN
-                person_infos ON person_infos.id = movie_characters.person_id
-            GROUP BY (table1.id,table1.genres,table1.original_language,table1.original_language,table1.overview,table1.poster_path,table1.release_date,table1.run_time,table1.title)
-            LIMIT 1
+            SELECT
+                table1.*,(string_to_array(string_agg(person_infos."name" ,',' ORDER BY movie_characters."order" asc), ','))[1:3] as casts
+            FROM (SELECT  movie_infos."id",movie_infos.title,movie_infos.poster_path,movie_infos.overview,movie_infos.release_date,movie_infos.run_time,movie_infos.original_language,string_to_array(string_agg(genre_infos.name, ','), ',') as genres FROM genres_movies
+         INNER JOIN
+            genre_infos ON genre_infos."id" = genres_movies.genre_info_id
+         INNER JOIN
+             movie_infos ON movie_infos."id" = genres_movies.movie_info_id
+         WHERE
+            movie_info_id IN (\(movieIDs))
+         GROUP BY
+         (movie_infos."id",movie_infos.title,movie_infos.poster_path,movie_infos.overview,movie_infos.release_date,movie_infos.run_time,movie_infos.original_language)) as table1
+         INNER JOIN
+                         movie_characters ON table1."id" = movie_characters.movie_id
+         INNER JOIN
+                         person_infos ON person_infos.id = movie_characters.person_id
+         GROUP BY (table1.id,table1.genres,table1.original_language,table1.original_language,table1.overview,table1.poster_path,table1.release_date,table1.run_time,table1.title)
+         LIMIT 20
         """
         
-        return postgresSql.raw(SQLQueryString(movieSQL)).first(decoding: MoviePreviewInfo.self)
-            .flatMapThrowing{result -> MoviePreviewInfo in
-                guard let previewInfo = result else{
-                    throw Abort(.badRequest,reason:"NO MOVIE IS FOUND....")
+        return postgresSql.raw(SQLQueryString(movieSQL)).all(decoding: MoviePreviewInfo.self)
+            .flatMapThrowing{result -> [MoviePreviewInfo] in
+                if result.count == 0{
+                    throw Abort(.noContent,reason:"NO MOVIE IS FOUND....")
                 }
-                return previewInfo
+                
+                return result
             }
     }
 }
