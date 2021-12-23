@@ -3,6 +3,7 @@ import FluentPostgresDriver
 import Vapor
 import JWT
 
+
 extension String{
     var bytes:[UInt8] { .init(self.utf8) }
 }
@@ -14,16 +15,22 @@ extension JWKIdentifier{
 
 // configures your application
 public func configure(_ app: Application) throws {
+    //Setup python and file localtion
+    
     // uncomment to serve files from /Public folder
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     print(app.directory.publicDirectory)
     app.http.server.configuration.port = 8080
     app.databases.use(.postgres(hostname: "localhost" ,username: "postgres",password:"admin",database:"MovieDB"), as: .psql)
     //terminal: vapor run migrate
-     app.migrations.add(CreateUser())
-     app.migrations.add(CreateArticle())
-     app.migrations.add(CreateList())
-     app.migrations.add(CreateListMovie())
+    app.migrations.add(CreateUser())
+    app.migrations.add(CreateArticle())
+    app.migrations.add(CreateComment())
+    app.migrations.add(CreateList())
+    app.migrations.add(CreateListMovie())
+    app.migrations.add(CreateLikeMovie())
+    app.migrations.add(CreateLikeArticle())
+
 
     // app.migrations.add(CreateMovie())
     // app.migrations.add(CreateGenre())

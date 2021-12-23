@@ -12,16 +12,16 @@ import Vapor
 final class List: Model, Content{
     static let schema = "lists"
 
-    @ID(key: .id)
+    @ID(key:.id)
     var id: UUID?
 
-    @Field(key: "list_Title")
+    @Field(key: "list_title")
     var Title: String
 
     @Parent(key: "user_id")
     var user: User
 
-    @Timestamp(key: "LastModifiedOn", on: .update)
+    @Timestamp(key: "list_last_update", on: .update)
     var updatedOn: Date?
 
 

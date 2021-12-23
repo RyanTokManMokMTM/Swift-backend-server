@@ -14,10 +14,10 @@ struct CreateListMovie: Migration{
         database.schema("lists_movies")    // table name
             .id()
             .field("list_id", .uuid, .required, .references("lists","id"))
-            .field("user_id", .uuid, .required, .references("users","id"))
+//            .field("user_id", .uuid, .required, .references("users","id"))
             .field("movie_id", .int, .required)
             .field("movie_title", .string, .required)
-            .field("movie_posterPath", .string)
+            .field("movie_poster_path", .string)
             .field("user_feeling", .custom("character varying(200)"), .required)
             .field("user_ratetext", .int, .required)
             .create()

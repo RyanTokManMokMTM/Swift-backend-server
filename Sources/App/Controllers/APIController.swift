@@ -10,13 +10,18 @@ import Vapor
 struct APIController : RouteCollection{
     func boot(routes: RoutesBuilder) throws {
         let api = routes.grouped("api")
-
         //specify controller
         //controller instance
         let playgroundControllor = PlaygroundController()
         let seachingController = SearchingController()
         let movieController = MovieController()
         let trailerController = TrailerVideoController()
+        let recommandationController = RecommandationController()
+        
+        let recommandation = api.grouped(RecommandMiddleWare())
+        recommandation.get("recommandmovies",use:recommandationController.getRecommandationResult(req:))
+        
+        
         
         let movieAPI = api.grouped("movie")
         movieAPI.get("getmoviecard", use: movieController.getMovieByGenre(req:))

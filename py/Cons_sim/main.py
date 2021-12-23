@@ -149,11 +149,11 @@ def users(user):
 
 def movie_vec(ans):
     # genres
-    featureG = ans.genres1.str.split(',', expand=True).stack().str.get_dummies().sum(level=0)
+    featureG = ans.genres1.str.split(',', expand=True).stack().str.get_dummies().groupby(level=0).sum()
     # cast
-    featureC = ans.cast1.str.split(',', expand=True).stack().str.get_dummies().sum(level=0)
+    featureC = ans.cast1.str.split(',', expand=True).stack().str.get_dummies().groupby(level=0).sum()
     movie_vec = featureG.merge(featureC, how='inner', left_index=True, right_index=True)
-     movie_vec = movie_vec.merge(featureC, how='inner', left_index=True, right_index=True)
+    movie_vec = movie_vec.merge(featureC, how='inner', left_index=True, right_index=True)
     movie_vec = pd.concat([ans, movie_vec], axis=1)
     movie_vec.set_index('movieid', inplace=True)
     movie_vec.drop(['genres1', 'cast1', 'title'], axis=1, inplace=True)
@@ -163,25 +163,24 @@ def movie_vec(ans):
 
 # movie_vec = movie_vec(ans)
 
-def user_vec(users):
-    # genres
-    featureGU = users.genres1.str.split(',', expand=True).stack().str.get_dummies().sum(level=0)
-    # cast
-    featureCU = users.cast1.str.split(',', expand=True).stack().str.get_dummies().sum(level=0)
+def user_vec(users,movieVec):
+    #genres
+    featureGU = users.genres1.str.split(',', expand=True).stack().str.get_dummies().groupby(level=0).sum()
+    #cast
+    featureCU = users.cast1.str.split(',', expand=True).stack().str.get_dummies().groupby(level=0).sum()
     user_vec = pd.DataFrame()
-    user_vec = user_vec.reindex(columns=movie_vec.columns)
+    user_vec = user_vec.reindex(columns =movieVec.columns)
     user_vec = user_vec.merge(featureGU, how='outer')
-    # user_vec = user_vec.merge(featureDU, how='outer')
-    # user_vec = user_vec.merge(featureCU, how='outer')
-    # user_vec = user_vec.merge(featureGU, how='inner', left_index=True, right_index=True)
+    #user_vec = user_vec.merge(featureDU, how='outer')
+    #user_vec = user_vec.merge(featureCU, how='outer')
+    #user_vec = user_vec.merge(featureGU, how='inner', left_index=True, right_index=True)
     user_vec = user_vec.merge(featureCU, how='inner', left_index=True, right_index=True)
     user_vec = pd.concat([users, user_vec], axis=1)
-    user_vec.drop(['genres1', 'cast1', 'movieid', 'title'], axis=1, inplace=True)
+    user_vec.drop(['genres1','cast1','movieid','title'],axis=1,inplace=True)
     user_vec = user_vec.fillna(0.0)
     user_vec = user_vec.groupby('userId').mean()
-    user_vec = user_vec[movie_vec.columns]
+    user_vec = user_vec[movieVec.columns]
     return user_vec
-
 
 # user_vec = user_vec(users)
 
@@ -203,38 +202,23 @@ def get_the_most_similar_movies(user_id, user_movie_matrix, num):
 
 # get_the_most_similar_movies = get_the_most_similar_movies(1, user_movie_matrix,4)
 
-def getRecommandMovies():
-    df = df1()
-    df['feature'] = df.apply(sub, axis=1)
-    cosine_sim_result = cosine_sim(df)
-    indices_result = indices(df)
-    user_result = user(df)
-    userlist_result = userlist(user_result)
-    ans_result = ans(df, indices_result, userlist_result, cosine_sim_result)
-    ans_result = ans_result.drop_duplicates(keep='first', inplace=False, subset=['title'])
-    userData = users(user_result)
+def getRecommandMovies(testData):
+    # Modifying data frame
+    movieDataFrame = df1()
+    movieDataFrame['feature'] = movieDataFrame.apply(sub, axis = 1)
 
-    movie_vec_result = movie_vec(ans_result)
-    user_vec_result = user_vec(userData)
-#    user_movie_matrix_result = user_movie_matrix(user_vec_result, movie_vec_result)
-#    get_the_most_similar_movies_result = get_the_most_similar_movies(1, user_movie_matrix_result, 4)
-    return "Tesing"
+    resultOfCosineSim = cosine_sim(movieDataFrame)
+    indicesOfDataFrame = indices(movieDataFrame)
 
-#if __name__ == '__main__':
-#    # start = time.time()
-#    # df1 = df1()
-#    # df1['feature'] = df1.apply(sub, axis=1)
-#    # cosine_sim = cosine_sim(df1)
-#    # indices = indices(df1)
-#    # user = user(df1)
-#    # userlist = userlist(user)
-#    # ans = ans(df1, indices, userlist, cosine_sim)
-#    # ans = ans.drop_duplicates(keep='first', inplace=False, subset=['title'])
-#    #
-#    # users = users(user)
-#    #
-#    # movie_vec = movie_vec(ans)
-#    # user_vec = user_vec(users)
-#    # user_movie_matrix = user_movie_matrix(user_vec, movie_vec)
-#    # get_the_most_similar_movies = get_the_most_similar_movies(1, user_movie_matrix, 4)
-#    # print(get_the_most_similar_movies)
+    userDataFrame = user(movieDataFrame)
+    userList = userlist(userDataFrame)
+    totalAns = ans(movieDataFrame,indicesOfDataFrame,userList,resultOfCosineSim)
+
+    userDataFrame = users(userDataFrame)
+    resultOfMovieVec = movie_vec(totalAns)
+    resultOfUserVec = user_vec(userDataFrame,resultOfMovieVec)
+    resultOfUserMoveMat = user_movie_matrix(resultOfUserVec,resultOfMovieVec)
+
+    similartMovies = get_the_most_similar_movies(1, resultOfUserMoveMat,20)
+    print(similartMovies)
+    return similartMovies

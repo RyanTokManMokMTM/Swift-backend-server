@@ -14,3 +14,8 @@ struct Me: Content {
     var id : UUID?
     var UserName : String
 }
+
+
+struct userID: Content {
+    var id : UUID?
+}

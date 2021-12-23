@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftUI
 import Fluent
 import Vapor
 import FluentPostgresDriver

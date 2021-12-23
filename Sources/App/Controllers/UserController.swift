@@ -19,9 +19,9 @@ struct UserController: RouteCollection{
             usr.post(use: register)
         }
         
-//        users.group(":UserName"){ usr in
-//            usr.get(use: GetUser)
-//        }
+        users.group(":userID"){ usr in
+            usr.get(use: GetUser)
+        }
         
         users.group("login"){ usr in
             usr.post(use: login)
@@ -81,26 +81,32 @@ struct UserController: RouteCollection{
 
         
         //確定password和confirmpassword是否一致
-        guard newUser.Password == newUser.confirmPassword else {
+        guard newUser.password == newUser.confirm_password else {
             throw Abort(.badRequest, reason: "Passwords did not match")
         }
        
         // 將UserRegister 轉成 User
-        let user = try User(UserName:newUser.UserName, Email: newUser.Email, Password: Bcrypt.hash(newUser.Password))
+        let user = try User(UserName:newUser.user_name, Email: newUser.email, Password: Bcrypt.hash(newUser.password), UserPhoto: "p1.jpg")
         
         return user.save(on: req.db).map { user }
     }
 
-    
-//    func GetUser(req: Request) throws -> EventLoopFuture<Me>{
-//        return User.query(on: req.db)
-//            .filter(\.$UserName == req.parameters.get("UserName") ?? "NA" )
-//            .first()
-//            .unwrap(or: Abort(.notAcceptable))
-//            .map { usr in
-//                return Me(id: usr.id ,UserName: usr.UserName)
-//            }
-//    }
+    //----------GET使用者info----------//
+    func GetUser(req: Request) throws -> EventLoopFuture<User>{
+        
+        guard let userID = req.parameters.get("userID") as UUID? else{
+            throw Abort(.badRequest)
+        }
+        
+        
+        return User.query(on: req.db)
+            .filter(\.$id == userID )
+            .first()
+            .unwrap(or: Abort(.notAcceptable))
+            .map { usr in
+                return usr
+            }
+    }
 
 
 

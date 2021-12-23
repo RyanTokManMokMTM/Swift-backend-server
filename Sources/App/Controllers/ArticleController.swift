@@ -29,12 +29,14 @@ struct ArticleController: RouteCollection{
         
     }
     
+    
     //--------------------------------get某電影的討論區文章--------------------------------//
     func GetArticle(req: Request) throws -> EventLoopFuture<[Article]> {
 
         guard let movieID = req.parameters.get("movieID") as Int? else{
             throw Abort(.badRequest)
         }
+
         return  Article.query(on: req.db)
             .with(\.$user)
             .sort(\.$updatedOn, .descending)
@@ -81,6 +83,7 @@ struct ArticleController: RouteCollection{
             .flatMap{
                 $0.Title = update.Title
                 $0.Text = update.Text
+                $0.LikeCount = update.LikeCount
                 return $0.update(on: req.db).transform(to: .ok)
             }
 

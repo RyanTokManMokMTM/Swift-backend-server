@@ -12,7 +12,7 @@ import Vapor
 final class ListMovie: Model, Content{
     static let schema = "lists_movies"
 
-    @ID(key: .id)
+    @ID(key:.id)
     var id: UUID?
 
     @Parent(key: "list_id")
@@ -24,7 +24,7 @@ final class ListMovie: Model, Content{
     @Field(key: "movie_title")
     var title: String
     
-    @Field(key: "movie_posterPath")
+    @Field(key: "movie_poster_path")
     var posterPath: String
     
     @Field(key: "user_feeling")

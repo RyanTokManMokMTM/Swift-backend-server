@@ -13,11 +13,11 @@ struct CreateComment: Migration{
     func prepare(on database: Database) -> EventLoopFuture<Void> {
         database.schema("comments")    // table name
             .id()
-            .field("comment_Text", .custom("character varying(200)"), .required)
+            .field("comment_text", .custom("character varying(200)"), .required)
             .field("user_id", .uuid, .required, .references("users","id"))
             .field("article_id",.uuid, .required, .references("articles","id"))
-            .field("LikeCount", .int)
-            .field("LastModifiedOn", .datetime, .required)
+            .field("comment_last_update", .datetime, .required)
+            .field("comment_like_count", .int)
             .create()
     }
     

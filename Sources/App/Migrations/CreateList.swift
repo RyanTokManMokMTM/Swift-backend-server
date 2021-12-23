@@ -13,9 +13,9 @@ struct CreateList: Migration{
     func prepare(on database: Database) -> EventLoopFuture<Void> {
         database.schema("lists")    // table name
             .id()
-            .field("list_Title", .custom("character varying(100)"), .required)
+            .field("list_title", .custom("character varying(100)"), .required)
             .field("user_id", .uuid, .required, .references("users","id"))
-            .field("LastModifiedOn", .datetime, .required)
+            .field("list_last_update", .datetime, .required)
             .create()
     }
     

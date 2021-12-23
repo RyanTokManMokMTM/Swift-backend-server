@@ -12,13 +12,13 @@ import Vapor
 final class Article: Model, Content{
     static let schema = "articles"
     
-    @ID(key: .id)
+    @ID(key:.id)
     var id: UUID?
     
-    @Field(key: "article_Title")
+    @Field(key: "article_title")
     var Title: String
     
-    @Field(key: "article_Text")
+    @Field(key: "article_text")
     var Text: String
     
     @Parent(key: "user_id")
@@ -27,10 +27,10 @@ final class Article: Model, Content{
     @Field(key: "movie_id")
     var movie: Int
     
-    @Field(key: "LikeCount")
+    @Field(key: "article_like_count")
     var LikeCount: Int
     
-    @Timestamp(key: "LastModifiedOn", on: .update)
+    @Timestamp(key: "article_last_update", on: .update)
     var updatedOn: Date?
     
     

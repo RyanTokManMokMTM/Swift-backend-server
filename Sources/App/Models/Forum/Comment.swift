@@ -15,7 +15,7 @@ final class Comment: Model, Content{
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: "comment_Text")
+    @Field(key: "comment_text")
     var Text: String
     
     @Parent(key: "user_id")
@@ -24,10 +24,10 @@ final class Comment: Model, Content{
     @Parent(key: "article_id")
     var article: Article
     
-    @Field(key: "LikeCount")
+    @Field(key: "comment_like_count")
     var LikeCount: Int
     
-    @Timestamp(key: "LastModifiedOn", on: .update)
+    @Timestamp(key: "comment_last_update", on: .update)
     var updatedOn: Date?
     
     
