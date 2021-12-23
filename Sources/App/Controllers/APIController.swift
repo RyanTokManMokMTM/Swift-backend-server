@@ -16,10 +16,10 @@ struct APIController : RouteCollection{
         let seachingController = SearchingController()
         let movieController = MovieController()
         let trailerController = TrailerVideoController()
-        let recommandationController = RecommandationController()
+        let recommendationController = RecommendationController()
         
-        let recommandation = api.grouped(RecommandMiddleWare())
-        recommandation.get("recommandmovies",use:recommandationController.getRecommandationResult(req:))
+        let recommendation = api.grouped(RecommandMiddleWare())
+        recommendation.get("recommendmovies",use:recommendationController.getRecommendationResult(req:))
         
         
         

@@ -1,4 +1,3 @@
-//
 //  SwiftUIView.swift
 //  
 //
@@ -9,10 +8,10 @@ import Fluent
 import Vapor
 import FluentPostgresDriver
 
-final class RecommandationController{
+final class RecommendationController{
     init(){}
     
-    func getRecommandationResult(req : Request) throws -> EventLoopFuture<MovieCardInfoResponse>{
+    func getRecommendationResult(req : Request) throws -> EventLoopFuture<MovieCardInfoResponse>{
         guard let movieIDs = req.headers["recommandIds"].first else{
             throw Abort(.internalServerError,reason: "SERVER ERROR")
         }

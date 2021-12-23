@@ -12,7 +12,7 @@ import re
 
 
 def df1():
-    df1 = pd.read_csv(u'/Users/jacksontmm/Desktop/Swift-backend-server//py/Cons_sim/feature.csv')
+    df1 = pd.read_csv(u'/home/smallpig/Desktop/Server/Swift-backend-server/py/Cons_sim/feature.csv')
     return df1
 
 
@@ -26,7 +26,7 @@ def sub(x):
 
 ##########電影item惟一貫量生成##############333
 def cosine_sim(df1):
-    model1 = word2vec.Word2Vec.load("/Users/jacksontmm/Desktop/Swift-backend-server//py/Cons_sim/ENtest.model")
+    model1 = word2vec.Word2Vec.load("/home/smallpig/Desktop/Server/Swift-backend-server/py/Cons_sim/ENtest.model")
     items = []
     # for title in x_train_creative_id:
     for num, title in enumerate(df1['feature'].tolist()):
@@ -53,7 +53,7 @@ def indices(df1):
 
 def user(df1):
     # create list of indices for later matching
-    user = pd.read_csv(u'/Users/jacksontmm/Desktop/Swift-backend-server//py/Cons_sim/userlist.csv')
+    user = pd.read_csv(u'/home/smallpig/Desktop/Server/Swift-backend-server/py/Cons_sim/userlist.csv')
     df1.drop(['feature'], axis=1, inplace=True)
     user = pd.merge(user, df1, on='movieid')
     return user

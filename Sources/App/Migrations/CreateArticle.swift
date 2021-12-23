@@ -8,7 +8,7 @@
 import Foundation
 import Fluent
 import FluentPostgresDriver
-import AppKit
+
 
 struct CreateArticle: Migration{
     func prepare(on database: Database) -> EventLoopFuture<Void> {
