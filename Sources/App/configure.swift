@@ -32,6 +32,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreateLikeArticle())
 
 
+
     // app.migrations.add(CreateMovie())
     // app.migrations.add(CreateGenre())
     // app.migrations.add(CreateGenresMovies())

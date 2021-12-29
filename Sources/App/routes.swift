@@ -13,12 +13,23 @@ func routes(_ app: Application) throws {
     try app.register(collection: CommentController())   //文章留言
     try app.register(collection: ArticleController())   //討論區文章
     try app.register(collection: UserController())      //登入註冊
-    try app.register(collection: APIController())     //API stuff
+    try app.register(collection: APIController())     //API Service
+    
+    
+    //Check connection
+    app.get("ping"){req -> ServerStatus in
+        return ServerStatus(status: "Online", code: 200)
+    }
 }
 
 
 struct Movies : Content {
     let results : [MovieInfo]
+}
+
+struct ServerStatus : Content{
+    let status : String
+    let code : Int
 }
 
 

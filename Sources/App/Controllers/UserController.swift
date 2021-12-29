@@ -73,11 +73,12 @@ struct UserController: RouteCollection{
     //----------使用者註冊----------//
     func register(req: Request) throws -> EventLoopFuture<User>{
         // 檢查email和password的格式
+        
         try UserRegister.validate(content: req)
         
         // 從request body中decode出UserRegister
         let newUser = try req.content.decode(UserRegister.self)
-        
+        print(newUser)
 
         
         //確定password和confirmpassword是否一致

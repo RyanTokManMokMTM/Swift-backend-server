@@ -204,6 +204,8 @@ def get_the_most_similar_movies(user_id, user_movie_matrix, num):
 
 def getRecommandMovies(testData):
     # Modifying data frame
+    
+    print(testData)
     movieDataFrame = df1()
     movieDataFrame['feature'] = movieDataFrame.apply(sub, axis = 1)
 
